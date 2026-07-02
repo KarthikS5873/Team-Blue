@@ -5,22 +5,34 @@ import { Header } from './components/Header';
 import { AuthOnboarding } from './pages/AuthOnboarding';
 import { Dashboard } from './pages/Dashboard';
 import { Activities } from './pages/Activities';
-import { Analysis } from './pages/Analysis';
-import { ClientsTasks } from './pages/ClientsTasks';
-import { CalendarMeetings } from './pages/CalendarMeetings';
-import { GoalsReports } from './pages/GoalsReports';
-import { AIInsights } from './pages/AIInsights';
+import { Tasks } from './pages/Tasks';
+import { Reports } from './pages/Reports';
 import { SettingsProfile } from './pages/SettingsProfile';
 
 const AppContent = () => {
-  const { user, currentRoute } = useApp();
+  const { isAuthenticated, isOnboarded, loading, currentRoute, navigateTo } = useApp();
 
-  // If no user session is present or onboarding hasn't been finished, force AuthOnboarding view
-  if (!user || !user.onboardingCompleted) {
+  React.useEffect(() => {
+    if (loading) return;
+    if (isAuthenticated && !isOnboarded && currentRoute !== '/onboarding') {
+      navigateTo('/onboarding');
+    } else if (!isAuthenticated && currentRoute !== '/' && currentRoute !== '/signup') {
+      navigateTo('/');
+    }
+  }, [isAuthenticated, isOnboarded, loading, currentRoute, navigateTo]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !isOnboarded) {
     return <AuthOnboarding />;
   }
 
-  // Master Router Switch
   const renderRoute = () => {
     switch (currentRoute) {
       case '/dashboard':
@@ -28,23 +40,12 @@ const AppContent = () => {
       case '/activity/new':
       case '/activity/history':
         return <Activities />;
-      case '/time-analysis':
-      case '/revenue':
-        return <Analysis />;
       case '/tasks':
-      case '/clients':
-        return <ClientsTasks />;
-      case '/calendar':
-      case '/meetings':
-        return <CalendarMeetings />;
-      case '/goals':
+        return <Tasks />;
       case '/reports':
-        return <GoalsReports />;
-      case '/ai-insights':
-        return <AIInsights />;
+        return <Reports />;
       case '/settings':
       case '/profile':
-      case '/help':
         return <SettingsProfile />;
       default:
         return <Dashboard />;
@@ -52,17 +53,11 @@ const AppContent = () => {
   };
 
   return (
-    <div id="chronos-app-frame" className="flex min-h-screen bg-slate-50 font-sans text-slate-900 antialiased selection:bg-blue-500/25 selection:text-blue-900">
-      {/* 1. Left Navigation Sidebar */}
+    <div className="flex min-h-screen bg-slate-950 font-sans text-slate-100 antialiased">
       <Sidebar />
-
-      {/* 2. Main Executive Canvas */}
-      <div id="main-content-viewport" className="flex-1 flex flex-col min-h-screen overflow-hidden">
-        {/* Top Header Controls */}
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         <Header />
-
-        {/* Dynamic Canvas Container */}
-        <main className="flex-1 overflow-y-auto px-8 py-6 scrollbar-thin">
+        <main className="flex-1 overflow-y-auto p-8">
           <div className="max-w-6xl mx-auto">
             {renderRoute()}
           </div>
