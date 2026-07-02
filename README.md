@@ -21,7 +21,8 @@ Without clear insights, they struggle to:
 
 ## 💡 Solution
 
-AI Time Value Analyzer automatically analyzes a user's daily activities and converts them into actionable business insights.
+AI Time Value Analyzer securely collects business activity data from solopreneurs and small businesses through manual input and tool integrations. Using AI, it analyzes how each activity contributes to business growth, identifies high- and low-value work, and provides actionable recommendations to prioritize, automate, delegate, or eliminate tasks. Instead of tracking time alone, the platform helps users maximize the business value of every hour they invest.
+
 
 Our platform helps users:
 - Identify high-value and low-value activities
