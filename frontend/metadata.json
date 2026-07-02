@@ -1,0 +1,6 @@
+{
+  "name": "ChronosAI",
+  "description": "AI-Powered Time Value Analyzer SaaS Application. Track activities, map revenue, manage clients, meetings, goals, and tasks, and receive deep AI insights on time monetization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
