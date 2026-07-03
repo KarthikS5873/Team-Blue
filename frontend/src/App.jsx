@@ -44,6 +44,7 @@ const AppContent = () => {
         return <Tasks />;
       case '/reports':
         return <Reports />;
+      
       case '/settings':
       case '/profile':
         return <SettingsProfile />;

@@ -31,7 +31,7 @@ export const Sidebar = () => {
         <div className="w-8 h-8 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
           <Sparkles className="w-5 h-5 text-white" />
         </div>
-        <span className="font-bold text-white text-lg tracking-tight">BusinessAI</span>
+        <span className="font-bold text-white text-lg tracking-tight">ValueTrack AI</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">

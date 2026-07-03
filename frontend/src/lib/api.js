@@ -60,7 +60,7 @@ export const api = {
 
   ai: {
     recommendations: () => request('/ai/recommendations', { method: 'POST' }),
-    prioritize: () => request('/ai/prioritize', { method: 'POST' })
+    prioritize: () => request('/ai/prioritize', { method: 'POST' }),
   },
 
   reports: {

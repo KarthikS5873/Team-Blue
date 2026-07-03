@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { BUSINESS_TYPES, ROLES } from '../lib/constants';
+import { ROLES } from '../lib/constants';
 import { Settings, User, Save, Loader2, AlertCircle, MapPin, Building2, Briefcase, FileText, Target, DollarSign } from 'lucide-react';
 
 export const SettingsProfile = () => {
@@ -10,7 +10,7 @@ export const SettingsProfile = () => {
   const [name, setName] = useState(userProfile?.name || '');
   const [location, setLocation] = useState(userProfile?.location || '');
   const [businessName, setBusinessName] = useState(businessProfile?.business_name || '');
-  const [businessType, setBusinessType] = useState(businessProfile?.business_type || '');
+  const businessType = 'Freelancer';
   const [role, setRole] = useState(businessProfile?.role || '');
   const [description, setDescription] = useState(businessProfile?.description || '');
   const [goal, setGoal] = useState(businessProfile?.goal || '');
@@ -101,10 +101,9 @@ export const SettingsProfile = () => {
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Business Type</label>
-              <select value={businessType} onChange={(e) => setBusinessType(e.target.value)}
-                className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none">
-                {BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
+              <div className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm flex items-center">
+                <span className="text-blue-400 font-semibold">Freelancer</span>
+              </div>
             </div>
             <div>
               <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Your Role</label>

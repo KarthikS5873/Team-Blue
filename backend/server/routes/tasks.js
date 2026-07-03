@@ -1,9 +1,17 @@
 import { Router } from 'express';
 import { supabase } from '../supabase.js';
 import { authenticateUser } from '../middleware/auth.js';
+import { autoAssignPriority } from '../services/gemini.js';
 
 const router = Router();
 router.use(authenticateUser);
+
+router.get('/debug-priority', (req, res) => {
+  const { title, deadline } = req.query;
+  const result = autoAssignPriority(title || '', deadline || null, {});
+  console.log(`[DEBUG] autoAssignPriority(title="${title}", deadline="${deadline}") = "${result}"`);
+  res.json({ title, deadline, autoAssignPriority: result });
+});
 
 const STATUS_MAP = { pending: 'Pending', 'in-progress': 'In Progress', completed: 'Completed', cancelled: 'Cancelled' };
 const STATUS_REVERSE = { 'Pending': 'pending', 'In Progress': 'in-progress', 'Completed': 'completed', 'Cancelled': 'cancelled' };
@@ -43,13 +51,27 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { title, priority, duration_minutes } = req.body;
+    const { title, deadline, priority: clientPriority } = req.body;
 
     if (!title) {
       return res.status(400).json({ error: 'title is required' });
     }
 
-    const capPriority = priority ? priority.charAt(0).toUpperCase() + priority.slice(1) : 'Medium';
+    let priority;
+    if (clientPriority) {
+      priority = clientPriority.toLowerCase();
+    } else {
+      const { data: businessProfile } = await supabase
+        .from('business_profiles')
+        .select('*')
+        .eq('user_id', req.userId)
+        .maybeSingle();
+
+      priority = autoAssignPriority(title, deadline, businessProfile || {});
+    }
+    const capPriority = priority.charAt(0).toUpperCase() + priority.slice(1);
+
+    console.log(`[CREATE TASK] title="${title}" autoAssign->${priority} cap->${capPriority}`);
 
     const { data, error } = await supabase
       .from('tasks')
@@ -57,13 +79,18 @@ router.post('/', async (req, res) => {
         user_id: req.userId,
         task_name: title,
         priority: capPriority,
-        deadline: null
+        deadline: deadline || null
       })
       .select()
       .single();
 
     if (error) return res.status(400).json({ error: error.message });
-    res.status(201).json(mapRow(data));
+
+    const result = mapRow(data);
+    result.autoPriority = priority;
+    result._debug = { autoAssignPriority: priority, storedAs: capPriority };
+    console.log(`[CREATE TASK RESPONSE] priority="${result.priority}" autoPriority="${result.autoPriority}"`);
+    res.status(201).json(result);
   } catch (error) {
     console.error('Create task error:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -73,13 +100,23 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, priority, status, deadline } = req.body;
+    const { title, status, deadline } = req.body;
 
     const updates = {};
     if (title !== undefined) updates.task_name = title;
-    if (priority !== undefined) updates.priority = priority.charAt(0).toUpperCase() + priority.slice(1);
     if (status !== undefined) updates.status = STATUS_MAP[status] || status;
     if (deadline !== undefined) updates.deadline = deadline;
+
+    if (title !== undefined) {
+      const { data: businessProfile } = await supabase
+        .from('business_profiles')
+        .select('*')
+        .eq('user_id', req.userId)
+        .maybeSingle();
+
+      const newPriority = autoAssignPriority(title, deadline, businessProfile || {});
+      updates.priority = newPriority.charAt(0).toUpperCase() + newPriority.slice(1);
+    }
 
     const { data, error } = await supabase
       .from('tasks')
@@ -91,7 +128,10 @@ router.put('/:id', async (req, res) => {
 
     if (error) return res.status(400).json({ error: error.message });
     if (!data) return res.status(404).json({ error: 'Task not found' });
-    res.json(mapRow(data));
+
+    const result = mapRow(data);
+    if (updates.priority) result.autoPriority = updates.priority.toLowerCase();
+    res.json(result);
   } catch (error) {
     console.error('Update task error:', error);
     res.status(500).json({ error: 'Internal server error' });

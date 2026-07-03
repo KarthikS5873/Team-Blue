@@ -47,6 +47,6 @@ app.use((err, req, res, next) => {
 startScheduler();
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`[Business Advisor API] running on http://localhost:${PORT}`);
+  console.log(`[ValueTrack AI API] running on http://localhost:${PORT}`);
   console.log(`[CORS] Allowed origins: ${ALLOWED_ORIGINS.join(', ')}`);
 });

@@ -1,16 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { ROLES } from '../lib/constants';
 import { Mail, Lock, Phone, User, MapPin, Building2, Briefcase, FileText, Target, DollarSign, ArrowRight, ArrowLeft, CheckCircle, Clock, Sparkles } from 'lucide-react';
-
-const BUSINESS_TYPES = [
-  'Freelancer', 'Agency', 'Restaurant', 'Retail Shop',
-  'SaaS Founder', 'Consultant', 'Coach', 'Other'
-];
-
-const ROLES = [
-  'Founder', 'Solopreneur', 'Sales Manager', 'Marketing Manager',
-  'Store Owner', 'CEO', 'Director', 'Other'
-];
 
 export const AuthOnboarding = () => {
   const { currentRoute, navigateTo, login, signup, completeOnboarding } = useApp();
@@ -26,9 +17,14 @@ export const AuthOnboarding = () => {
 
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
+  const [country, setCountry] = useState('India');
+  const [stateVal, setStateVal] = useState('Tamil Nadu');
+  const [city, setCity] = useState('Coimbatore');
+  const [customCountry, setCustomCountry] = useState('');
+  const [customState, setCustomState] = useState('');
+  const [customCity, setCustomCity] = useState('');
   const [businessName, setBusinessName] = useState('');
-  const [businessType, setBusinessType] = useState('');
+  const businessType = 'Freelancer';
   const [role, setRole] = useState('');
   const [description, setDescription] = useState('');
   const [monthlyRevenue, setMonthlyRevenue] = useState('');
@@ -36,6 +32,25 @@ export const AuthOnboarding = () => {
   const [dailyRevenue, setDailyRevenue] = useState('');
   const [goal, setGoal] = useState('');
   const [onboardingError, setOnboardingError] = useState('');
+
+  const COUNTRIES_DATA = {
+    'India': {
+      'Tamil Nadu': ['Coimbatore', 'Chennai', 'Madurai', 'Trichy', 'Salem', 'Other'],
+      'Karnataka': ['Bangalore', 'Mysore', 'Mangalore', 'Hubli', 'Other'],
+      'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik', 'Other'],
+      'Delhi': ['New Delhi', 'Dwarka', 'Rohini', 'Other'],
+      'Gujarat': ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Other'],
+      'Other': []
+    },
+    'USA': {
+      'California': ['Los Angeles', 'San Francisco', 'San Diego', 'San Jose', 'Other'],
+      'New York': ['New York City', 'Buffalo', 'Rochester', 'Albany', 'Other'],
+      'Texas': ['Houston', 'Austin', 'Dallas', 'San Antonio', 'Other'],
+      'Florida': ['Miami', 'Orlando', 'Tampa', 'Jacksonville', 'Other'],
+      'Other': []
+    },
+    'Other': {}
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -61,17 +76,59 @@ export const AuthOnboarding = () => {
     }
   };
 
-  const handleCompleteOnboarding = async () => {
+  const handleStep1Next = () => {
     setOnboardingError('');
-    if (!name || !businessName || !businessType || !role || !goal) {
-      setOnboardingError('Please fill in all required fields');
+    if (!name.trim()) {
+      setOnboardingError('Full Name is required');
       return;
     }
+    setStep(2);
+  };
+
+  const handleStep2Next = () => {
+    setOnboardingError('');
+    if (!businessName.trim()) {
+      setOnboardingError('Business Name is required');
+      return;
+    }
+    if (!role) {
+      setOnboardingError('Your Role is required');
+      return;
+    }
+    setStep(3);
+  };
+
+  const handleStep3Next = () => {
+    setOnboardingError('');
+    setStep(4);
+  };
+
+  const handleCompleteOnboarding = async () => {
+    setOnboardingError('');
+    if (!name.trim()) {
+      setOnboardingError('Full Name is required');
+      setStep(1);
+      return;
+    }
+    if (!businessName.trim() || !role) {
+      setOnboardingError('Please fill in all required Business Details');
+      setStep(2);
+      return;
+    }
+    if (!goal.trim()) {
+      setOnboardingError('Business Goal is required');
+      return;
+    }
+
+    const finalCountry = country === 'Other' ? customCountry : country;
+    const finalState = (country === 'Other' || stateVal === 'Other') ? customState : stateVal;
+    const finalCity = (country === 'Other' || stateVal === 'Other' || city === 'Other') ? customCity : city;
+    const resolvedLocation = [finalCity, finalState, finalCountry].filter(Boolean).join(', ');
 
     try {
       await completeOnboarding({
         name,
-        location,
+        location: resolvedLocation,
         business_name: businessName,
         business_type: businessType,
         role,
@@ -147,7 +204,7 @@ export const AuthOnboarding = () => {
 
             <div className="mt-6 pt-6 border-t border-slate-800/60 text-center">
               <p className="text-xs text-slate-500">
-                New to BusinessAI?{' '}
+                New to ValueTrack AI?{' '}
                 <button onClick={() => navigateTo('/signup')} className="text-blue-400 hover:text-blue-300 font-semibold cursor-pointer">
                   Create workspace
                 </button>
@@ -233,25 +290,32 @@ export const AuthOnboarding = () => {
   }
 
   if (currentRoute === '/onboarding') {
+    const countries = Object.keys(COUNTRIES_DATA);
+    const states = COUNTRIES_DATA[country] ? Object.keys(COUNTRIES_DATA[country]) : [];
+    const cities = (COUNTRIES_DATA[country] && COUNTRIES_DATA[country][stateVal]) ? COUNTRIES_DATA[country][stateVal] : [];
+
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6">
         <div className="w-full max-w-2xl">
           <div className="text-center mb-8">
-            <p className="text-xs text-blue-400 font-bold uppercase tracking-widest">BusinessAI Setup</p>
+            <p className="text-xs text-blue-400 font-bold uppercase tracking-widest">ValueTrack AI Setup</p>
             <h1 className="text-2xl font-bold text-white mt-2">Configure Your Business Profile</h1>
             <p className="text-sm text-slate-400 mt-1">Help us understand your business for personalized recommendations</p>
 
             <div className="flex items-center justify-center space-x-2 mt-6">
-              {[1, 2, 3, 4, 5].map(s => (
+              {[1, 2, 3, 4].map(s => (
                 <div key={s} className={`h-1.5 rounded-full transition-all duration-300 ${step === s ? 'w-10 bg-blue-500' : step > s ? 'w-4 bg-blue-600' : 'w-2 bg-slate-700'}`} />
               ))}
             </div>
-            <p className="text-xs text-slate-500 mt-2">Step {step} of 5</p>
+            <p className="text-xs text-slate-500 mt-2">Step {step} of 4</p>
           </div>
 
           <div className="bg-slate-900 border border-slate-800 rounded-lg p-8 shadow-2xl">
             {onboardingError && (
-              <div className="mb-4 p-3 bg-red-500/10 text-red-400 rounded-lg border border-red-500/20 text-xs">{onboardingError}</div>
+              <div className="mb-6 p-3.5 bg-red-500/10 text-red-400 rounded-lg border border-red-500/20 text-xs font-medium flex items-center space-x-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                <span>{onboardingError}</span>
+              </div>
             )}
 
             {step === 1 && (
@@ -261,20 +325,91 @@ export const AuthOnboarding = () => {
                 </h3>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Full Name *</label>
-                  <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+                  <input type="text" value={name} onChange={(e) => { setName(e.target.value); setOnboardingError(''); }}
                     className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
                     placeholder="Alex Carter" required />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                    <MapPin className="w-3 h-3 inline mr-1" /> Location
+                
+                <div className="space-y-4">
+                  <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0">
+                    <MapPin className="w-3 h-3 inline mr-1" /> Location Selection
                   </label>
-                  <input type="text" value={location} onChange={(e) => setLocation(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
-                    placeholder="Coimbatore, Tamil Nadu" />
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Country</label>
+                      <select value={country} onChange={(e) => {
+                        const nextCountry = e.target.value;
+                        setCountry(nextCountry);
+                        const nextStates = COUNTRIES_DATA[nextCountry] ? Object.keys(COUNTRIES_DATA[nextCountry]) : [];
+                        const nextState = nextStates[0] || '';
+                        setStateVal(nextState);
+                        const nextCities = (COUNTRIES_DATA[nextCountry] && COUNTRIES_DATA[nextCountry][nextState]) ? COUNTRIES_DATA[nextCountry][nextState] : [];
+                        setCity(nextCities[0] || '');
+                      }}
+                        className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none">
+                        {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+
+                    {country !== 'Other' && (
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">State</label>
+                        <select value={stateVal} onChange={(e) => {
+                          const nextState = e.target.value;
+                          setStateVal(nextState);
+                          const nextCities = COUNTRIES_DATA[country][nextState] || [];
+                          setCity(nextCities[0] || '');
+                        }}
+                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none">
+                          {states.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
+                    )}
+
+                    {country !== 'Other' && stateVal !== 'Other' && (
+                      <div>
+                        <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">City</label>
+                        <select value={city} onChange={(e) => setCity(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none">
+                          {cities.map(ct => <option key={ct} value={ct}>{ct}</option>)}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  {(country === 'Other' || stateVal === 'Other' || city === 'Other') && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-slate-800/40">
+                      {country === 'Other' && (
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1.5">Custom Country *</label>
+                          <input type="text" value={customCountry} onChange={(e) => setCustomCountry(e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500"
+                            placeholder="e.g. Canada" required />
+                        </div>
+                      )}
+                      {(country === 'Other' || stateVal === 'Other') && (
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1.5">Custom State *</label>
+                          <input type="text" value={customState} onChange={(e) => setCustomState(e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500"
+                            placeholder="e.g. Ontario" required />
+                        </div>
+                      )}
+                      {(country === 'Other' || stateVal === 'Other' || city === 'Other') && (
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 uppercase mb-1.5">Custom City *</label>
+                          <input type="text" value={customCity} onChange={(e) => setCustomCity(e.target.value)}
+                            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500"
+                            placeholder="e.g. Toronto" required />
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
+
                 <div className="flex justify-end pt-4">
-                  <button onClick={() => setStep(2)} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
+                  <button onClick={handleStep1Next} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
                     <span>Next - Business Details</span><ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -288,22 +423,21 @@ export const AuthOnboarding = () => {
                 </h3>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Business Name *</label>
-                  <input type="text" value={businessName} onChange={(e) => setBusinessName(e.target.value)}
+                  <input type="text" value={businessName} onChange={(e) => { setBusinessName(e.target.value); setOnboardingError(''); }}
                     className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none"
                     placeholder="Growth Digital Agency" required />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Business Type *</label>
-                    <select value={businessType} onChange={(e) => setBusinessType(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none">
-                      <option value="">Select type</option>
-                      {BUSINESS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Business Type</label>
+                    <div className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm flex items-center">
+                      <span className="text-blue-400 font-semibold">Freelancer</span>
+                      <span className="ml-2 text-[10px] text-slate-500">(auto)</span>
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Your Role *</label>
-                    <select value={role} onChange={(e) => setRole(e.target.value)}
+                    <select value={role} onChange={(e) => { setRole(e.target.value); setOnboardingError(''); }}
                       className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none">
                       <option value="">Select role</option>
                       {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
@@ -319,10 +453,10 @@ export const AuthOnboarding = () => {
                     placeholder="I run a digital marketing agency serving local businesses in Coimbatore..." />
                 </div>
                 <div className="flex justify-between pt-4">
-                  <button onClick={() => setStep(1)} className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
+                  <button onClick={() => { setOnboardingError(''); setStep(1); }} className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
                     <ArrowLeft className="w-4 h-4" /><span>Back</span>
                   </button>
-                  <button onClick={() => setStep(3)} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
+                  <button onClick={handleStep2Next} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
                     <span>Next - Revenue</span><ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -365,10 +499,10 @@ export const AuthOnboarding = () => {
                   </div>
                 </div>
                 <div className="flex justify-between pt-4">
-                  <button onClick={() => setStep(2)} className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
+                  <button onClick={() => { setOnboardingError(''); setStep(2); }} className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
                     <ArrowLeft className="w-4 h-4" /><span>Back</span>
                   </button>
-                  <button onClick={() => setStep(4)} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
+                  <button onClick={handleStep3Next} className="px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
                     <span>Next - Goal</span><ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
@@ -383,7 +517,7 @@ export const AuthOnboarding = () => {
                 <p className="text-xs text-slate-400">What's the primary goal you want to achieve?</p>
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Goal *</label>
-                  <textarea value={goal} onChange={(e) => setGoal(e.target.value)}
+                  <textarea value={goal} onChange={(e) => { setGoal(e.target.value); setOnboardingError(''); }}
                     className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-white text-sm focus:border-blue-500 focus:outline-none h-24"
                     placeholder="Reach ₹2,00,000 monthly revenue in 6 months" required />
                 </div>
@@ -392,7 +526,7 @@ export const AuthOnboarding = () => {
                   Your goal helps the AI recommend actions aligned to your vision. Be specific.
                 </div>
                 <div className="flex justify-between pt-4">
-                  <button onClick={() => setStep(3)} className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
+                  <button onClick={() => { setOnboardingError(''); setStep(3); }} className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">
                     <ArrowLeft className="w-4 h-4" /><span>Back</span>
                   </button>
                   <button onClick={handleCompleteOnboarding} className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-bold text-sm rounded-lg flex items-center space-x-2 cursor-pointer">

@@ -1,1 +1,80 @@
 @import "tailwindcss";
+
+@theme {
+  --color-slate-950: var(--slate-955-custom);
+  --color-slate-950-30: rgba(var(--slate-950-raw), 0.3);
+  --color-slate-900: var(--slate-900-custom);
+  --color-slate-850: var(--slate-850-custom);
+  --color-slate-800: var(--slate-800-custom);
+  --color-slate-100: var(--slate-100-custom);
+  --color-slate-200: var(--slate-200-custom);
+  --color-slate-300: var(--slate-300-custom);
+  --color-slate-400: var(--slate-400-custom);
+}
+
+:root {
+  --slate-955-custom: #020617;
+  --slate-950-custom: #020617;
+  --slate-900-custom: #0f172a;
+  --slate-850-custom: #1e293b;
+  --slate-800-custom: #1e293b;
+  --slate-100-custom: #f8fafc;
+  --slate-200-custom: #e2e8f0;
+  --slate-300-custom: #cbd5e1;
+  --slate-400-custom: #94a3b8;
+  background-color: #020617;
+  color: #f8fafc;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+:root.light {
+  --slate-955-custom: #f8fafc;
+  --slate-950-custom: #f8fafc;
+  --slate-900-custom: #ffffff;
+  --slate-850-custom: #e2e8f0;
+  --slate-800-custom: #cbd5e1;
+  --slate-100-custom: #0f172a;
+  --slate-200-custom: #1e293b;
+  --slate-300-custom: #334155;
+  --slate-400-custom: #475569;
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Light Theme overrides for hardcoded white colors */
+.light .text-white:not(
+  button, 
+  button *, 
+  .bg-blue-600 *, 
+  .bg-indigo-600 *, 
+  .bg-emerald-600 *, 
+  .bg-red-600 *, 
+  .bg-gradient-to-r *, 
+  .bg-gradient-to-tr *, 
+  .bg-blue-500, 
+  .bg-blue-500 *
+) {
+  color: #0f172a !important;
+}
+
+/* Ensure active sidebar links are readable */
+.light button.bg-slate-800 {
+  background-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+.light button.bg-slate-800 svg {
+  color: #2563eb !important;
+}
+
+/* Input placeholder text visibility */
+.light input::placeholder,
+.light select::placeholder,
+.light textarea::placeholder {
+  color: #64748b !important;
+}
+
+/* Custom text classes contrast */
+.light .text-slate-100 { color: #0f172a !important; }
+.light .text-slate-200 { color: #1e293b !important; }
+.light .text-slate-350, .light .text-slate-300 { color: #334155 !important; }
+.light .text-slate-400 { color: #475569 !important; }

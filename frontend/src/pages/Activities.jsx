@@ -19,7 +19,7 @@ export const Activities = () => {
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const categories = ACTIVITY_CATEGORIES[businessProfile?.business_type] || ACTIVITY_CATEGORIES['Other'];
+  const categories = ACTIVITY_CATEGORIES['Freelancer'];
 
   const fetchActivities = useCallback(async () => {
     setLoading(true);
