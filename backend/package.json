@@ -1,0 +1,19 @@
+{
+  "name": "business-advisor-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.4.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "pg": "^8.22.0",
+    "ws": "^8.21.0"
+  }
+}
